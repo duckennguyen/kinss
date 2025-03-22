@@ -113,12 +113,12 @@ function change_status(obj) {
                 t = 'saved'
                 var url = "/api/article-list?type=saved&since_id=" + since_id;
                 $("i.article.star").removeClass("fa-star-o").addClass('fa-star');
-                title = "星标 ";
+                title = "Saved ";
             } else { //本来已加星的，目标为未读
                 t = 'unread'
                 var url = "/api/article-list?type=unread&since_id=" + since_id;
                 $("i.article.star").removeClass("fa-star").addClass('fa-star-o');
-                title = "未读 ";
+                title = "Unread ";
             }
 
             addItems(url, title);
@@ -126,7 +126,7 @@ function change_status(obj) {
         } else if ($(obj).hasClass("read")) {
             var items = $("#items li")
             var itemsNumber = items.length
-            var r = confirm("确定将这个页面中的" + itemsNumber + "个条目都设置为已读嘛？");
+            var r = confirm("Are you sure you want to set all " + itemsNumber + " items on this page as read?");
             if (r) {
                 items = items.map(function (i) { return $(items[i]).attr("item_id") })
                 items = $.map(items, function (value, index) {
@@ -218,44 +218,50 @@ function markItems(idArray, type) {
 }
 
 function GetDateToNewData(diffValue) {
-    // from https://blog.csdn.net/wangkunjiao/article/details/103577995 ,BTW,there are some bugs in the page but I fixed.
-    diffValue = diffValue * 1000
-    var minute = 60000;
-    var hour = minute * 60;
-    var day = hour * 24;
-    var month = day * 30;
+  // from https://blog.csdn.net/wangkunjiao/article/details/103577995 ,BTW,there are some bugs in the page but I fixed.
+  diffValue = diffValue * 1000;
+  var minute = 60000;
+  var hour = minute * 60;
+  var day = hour * 24;
+  var month = day * 30;
 
-    var nowTime = (new Date()).getTime(); //获取当前时间戳
+  var nowTime = new Date().getTime();
 
-    var ShiJianCha = nowTime - diffValue;
+  var timeDiff = nowTime - diffValue;
 
-    var monthC = ShiJianCha / month;
-    var weekC = ShiJianCha / (7 * day);
-    var dayC = ShiJianCha / day;
-    var hourC = ShiJianCha / hour;
-    var minC = ShiJianCha / minute;
-    var res = '';
+  var monthC = timeDiff / month;
+  var weekC = timeDiff / (7 * day);
+  var dayC = timeDiff / day;
+  var hourC = timeDiff / hour;
+  var minC = timeDiff / minute;
+  var res = "";
 
-    if (monthC >= 12) {
-        var date = new Date(diffValue);
-        res = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
-    } else if (monthC >= 1) {
-        res = parseInt(monthC) + "个月前";
-    }
-    else if (weekC >= 1) {
-        res = parseInt(weekC) + "周前"
-    }
-    else if (dayC >= 1) {
-        res = parseInt(dayC) + "天前"
-    }
-    else if (hourC >= 1) {
-        res = parseInt(hourC) + "个小时前"
-    }
-    else if (minC >= 1) {
-        res = parseInt(minC) + "分钟前"
-    } else {
-        res = "刚刚"
-    }
-    return res;
-
+  if (monthC >= 12) {
+    var date = new Date(diffValue);
+    res =
+      date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate();
+  } else if (monthC >= 2) {
+    res = parseInt(monthC) + " months ago";
+  } else if (monthC >= 1) {
+    res = parseInt(monthC) + " month ago";
+  } else if (weekC >= 2) {
+    res = parseInt(weekC) + " weeks ago";
+  } else if (weekC >= 1) {
+    res = parseInt(weekC) + " week ago";
+  } else if (dayC >= 2) {
+    res = parseInt(dayC) + " days ago";
+  } else if (dayC >= 1) {
+    res = parseInt(dayC) + " day ago";
+  } else if (hourC >= 2) {
+    res = parseInt(hourC) + " hours ago";
+  } else if (hourC >= 1) {
+    res = parseInt(hourC) + " hour ago";
+  } else if (minC >= 2) {
+    res = parseInt(minC) + " minutes ago";
+  } else if (minC >= 1) {
+    res = parseInt(minC) + " minute ago";
+  } else {
+    res = "now";
+  }
+  return res;
 }

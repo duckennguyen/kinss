@@ -79,7 +79,7 @@ def resize_img(raw):
         bili = 1080 / width
         width = int(width * bili)
         height = int(im.size[1] * bili)
-    im = im.resize((width, height), Image.ANTIALIAS)
+    im = im.resize((width, height), Image.LANCZOS)
     im = im.convert('RGB')
     output = io.BytesIO()
     im.save(output, 'JPEG', quality=90)

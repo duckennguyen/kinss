@@ -2,6 +2,7 @@ from gevent import monkey
 from gevent.pywsgi import WSGIServer
 monkey.patch_all()
 
+import base64
 import io
 import os
 from datetime import timedelta
@@ -132,17 +133,27 @@ class GetImg(Resource):
         url = request.args.get("url")
         headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36',
                    'Referer': urlparse(url).scheme + '://' + urlparse(url).netloc}
-        r = requests.get(src, headers=headers)
-        if r.status_code == requests.codes.OK:
-            if src.split('.')[-1] == 'gif':
-                res = make_response(r.content)
-                res.headers['Content-Type'] = r.headers['Content-Type']
-                return res
+        try:
+            r = requests.get(src, headers=headers, timeout=5) # added timeout to prevent indefinite hanging
+            if r.status_code == requests.codes.OK:
+                if src.split('.')[-1] == 'gif':
+                    res = make_response(r.content)
+                    res.headers['Content-Type'] = r.headers['Content-Type']
+                    return res
+                else:
+                    raw = resize_img(io.BytesIO(r.content))
+                    return send_file(raw, mimetype='image/jpeg')
             else:
-                raw = resize_img(io.BytesIO(r.content))
-                return send_file(raw, mimetype='image/jpeg')
-        else:
-            r.raise_for_status()
+                # instead of raising error, return a transparent pixel to avoid 500 error
+                # r.raise_for_status()
+                transparent_pixel = io.BytesIO(base64.b64decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="))
+                return send_file(transparent_pixel, mimetype='image/jpeg')
+
+        except requests.exceptions.RequestException as e: # catch exceptions like timeout, connection error, etc.
+            print(f"Error fetching image from {src}: {e}") # log the error for debugging
+            # return a transparent pixel on error to prevent 500 error
+            transparent_pixel = io.BytesIO(base64.b64decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="))
+            return send_file(transparent_pixel, mimetype='image/jpeg')
 
 
 class GetQrCode(Resource):
