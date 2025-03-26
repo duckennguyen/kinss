@@ -50,5 +50,13 @@ On Kobo, you can favorite the direct login link for convenient access, or set it
 - Save (star) entries
 - QR code of original article
 
+## Screenshots (Kobo Libra 2)
+
+![](assets/1.png)
+![](assets/2.png)
+![](assets/3.png)
+![](assets/4.png)
+![](assets/5.png)
+
 ## License
 Kinss is open-source under the [MIT license](https://opensource.org/licenses/MIT).
